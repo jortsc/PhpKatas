@@ -28,52 +28,53 @@ namespace PhpKatas;
  */
 class StringCalculator
 {
-    const COMMA_DELIMITER = ',';
     const SEMICOLON_DELIMITER = ';';
-    const BLANK_SPACE_DELIMITER = ' ';
     const NEW_LINE_DELIMITER = "\n";
-
-    const SUPPORTED_DELIMITERS = [',', '+', ';', ':'];
+    const SUPPORTED_DELIMITERS = [',', '+', ':', self::SEMICOLON_DELIMITER];
 
 
     /**
      * @throws \Exception
     */
-    public function add($numbers)
+    public function add(string $numbers): int
     {
         $sum = 0;
         if ($numbers === '') {
             return $sum;
         }
+        $this->checkNegativeNumbers($numbers);
 
-        if (preg_match_all('/(-[0-9]+)/', $numbers, $matches)) {
-            $negativeOnes = implode(', ', $matches[0]);
-            throw new \Exception("Negatives not allowed: {$negativeOnes}");
-        }
-
-        $delimiter = self::SEMICOLON_DELIMITER;
-        $changeDelimiterPattern = '/^['. implode('|', self::SUPPORTED_DELIMITERS) . ']+\\n[0-9]+/';
-        if (preg_match($changeDelimiterPattern, $numbers) === 1) {
-            $delimiter = substr($numbers, 0, 1);
-        }
-
+        $delimiter = $this->getDelimiter($numbers);
         if (preg_match("/[0-9]+\s*{$delimiter}\s*\\n/", $numbers) === 1) {
             return $sum;
         }
 
-        $replaced = str_replace(
-            self::NEW_LINE_DELIMITER,
-            $delimiter,
-            $numbers
+        return array_sum(
+            explode(
+                $delimiter,
+                str_replace(self::NEW_LINE_DELIMITER, $delimiter, $numbers)
+            )
         );
+    }
 
-        $numbers = explode($delimiter, $replaced);
+    /**
+     * @throws \Exception
+     */
+    protected function checkNegativeNumbers(string $numbers): void
+    {
+        if (preg_match_all('/(-[0-9]+)/', $numbers, $matches)) {
+            $negativeOnes = implode(', ', $matches[0]);
+            throw new \Exception("Negatives not allowed: {$negativeOnes}");
+        }
+    }
 
-        foreach ($numbers as $number) {
-            $sum += (int) $number;
+    protected function getDelimiter(string $numbers): string
+    {
+        $changeDelimiterPattern = '/^[' . implode('|', self::SUPPORTED_DELIMITERS) . ']+\\n[0-9]+/';
+        if (preg_match($changeDelimiterPattern, $numbers) === 1) {
+            return substr($numbers, 0, 1);
         }
 
-
-        return $sum;
+        return self::SEMICOLON_DELIMITER;
     }
 }
