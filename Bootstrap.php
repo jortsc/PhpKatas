@@ -18,10 +18,4 @@ set_include_path(
     )
 );
 
-
 require_once APPLICATION_PATH . '/PhpKatas/vendor/autoload.php';
-
-ini_set('memory_limit', '768M');
-
-echo "lol";
-echo APPLICATION_PATH;
